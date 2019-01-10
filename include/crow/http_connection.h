@@ -152,7 +152,7 @@ namespace crow
         }
 
         template <int N, typename Context, typename Container>
-        typename std::enable_if<(N<0)>::type 
+        typename std::enable_if<(N<0)>::type
         after_handlers_call_helper(Container& /*middlewares*/, Context& /*context*/, request& /*req*/, response& /*res*/)
         {
         }
@@ -183,17 +183,17 @@ namespace crow
     {
     public:
         Connection(
-            boost::asio::io_service& io_service, 
-            Handler* handler, 
+            boost::asio::io_service& io_service,
+            Handler* handler,
             const std::string& server_name,
             std::tuple<Middlewares...>* middlewares,
             std::function<std::string()>& get_cached_date_str_f,
             detail::dumb_timer_queue& timer_queue,
             typename Adaptor::context* adaptor_ctx_
-            ) 
-            : adaptor_(io_service, adaptor_ctx_), 
-            handler_(handler), 
-            parser_(this), 
+            )
+            : adaptor_(io_service, adaptor_ctx_),
+            handler_(handler),
+            parser_(this),
             server_name_(server_name),
             middlewares_(middlewares),
             get_cached_date_str(get_cached_date_str_f),
@@ -204,7 +204,7 @@ namespace crow
             CROW_LOG_DEBUG << "Connection open, total " << connectionCount << ", " << this;
 #endif
         }
-        
+
         ~Connection()
         {
             res.complete_request_handler_ = nullptr;
@@ -345,13 +345,13 @@ namespace crow
                 detail::after_handlers_call_helper<
                     ((int)sizeof...(Middlewares)-1),
                     decltype(ctx_),
-                    decltype(*middlewares_)> 
+                    decltype(*middlewares_)>
                 (*middlewares_, ctx_, req_, res);
             }
 
             //auto self = this->shared_from_this();
             res.complete_request_handler_ = nullptr;
-            
+
             if (!adaptor_.is_open())
             {
                 //CROW_LOG_DEBUG << this << " delete (socket is closed) " << is_reading << ' ' << is_writing;
@@ -395,6 +395,11 @@ namespace crow
                 res.body = json::dump(res.json_value);
             }
 
+            if(res.bytes.empty())
+            {
+                std::copy(res.body.begin(), res.body.end(), std::back_inserter(res.bytes));
+            }
+
             if (!statusCodes.count(res.code))
                 res.code = 500;
             {
@@ -416,7 +421,7 @@ namespace crow
 
             if (!res.headers.count("content-length"))
             {
-                content_length_ = std::to_string(res.body.size());
+                content_length_ = std::to_string(res.bytes.size());
                 static std::string content_length_tag = "Content-Length: ";
                 buffers_.emplace_back(content_length_tag.data(), content_length_tag.size());
                 buffers_.emplace_back(content_length_.data(), content_length_.size());
@@ -445,8 +450,10 @@ namespace crow
             }
 
             buffers_.emplace_back(crlf.data(), crlf.size());
-            res_body_copy_.swap(res.body);
-            buffers_.emplace_back(res_body_copy_.data(), res_body_copy_.size());
+            //res_body_copy_.swap(res.body);
+            res_bytes_copy_.swap(res.bytes);
+            //buffers_.emplace_back(res_body_copy_.data(), res_body_copy_.size());
+            buffers_.emplace_back(res_bytes_copy_.data(), res_bytes_copy_.size());
 
             do_write();
 
@@ -463,7 +470,7 @@ namespace crow
         {
             //auto self = this->shared_from_this();
             is_reading = true;
-            adaptor_.socket().async_read_some(boost::asio::buffer(buffer_), 
+            adaptor_.socket().async_read_some(boost::asio::buffer(buffer_),
                 [this](const boost::system::error_code& ec, std::size_t bytes_transferred)
                 {
                     bool error_while_reading = true;
@@ -510,7 +517,7 @@ namespace crow
         {
             //auto self = this->shared_from_this();
             is_writing = true;
-            boost::asio::async_write(adaptor_.socket(), buffers_, 
+            boost::asio::async_write(adaptor_.socket(), buffers_,
                 [&](const boost::system::error_code& ec, std::size_t /*bytes_transferred*/)
                 {
                     is_writing = false;
@@ -552,7 +559,7 @@ namespace crow
         void start_deadline(/*int timeout = 5*/)
         {
             cancel_deadline_timer();
-            
+
             timer_cancel_key_ = timer_queue.add([this]
             {
                 if (!adaptor_.is_open())
@@ -582,6 +589,7 @@ namespace crow
         std::string content_length_;
         std::string date_str_;
         std::string res_body_copy_;
+        std::vector<char> res_bytes_copy_;
 
         //boost::asio::deadline_timer deadline_;
         detail::dumb_timer_queue::key timer_cancel_key_;

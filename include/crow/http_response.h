@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 #include <unordered_map>
 
 #include "crow/json.h"
@@ -17,6 +18,7 @@ namespace crow
 
         int code{200};
         std::string body;
+        std::vector<char> bytes;
         json::wvalue json_value;
 
         // `headers' stores HTTP headers.
@@ -40,6 +42,8 @@ namespace crow
 
         response() {}
         explicit response(int code) : code(code) {}
+        response(int code, std::vector<char> &data) : code(code), bytes(std::move(data)) {}
+        response(std::vector<char> &data) : bytes(std::move(data)) {}
         response(std::string body) : body(std::move(body)) {}
         response(json::wvalue&& json_value) : json_value(std::move(json_value))
         {
@@ -65,6 +69,7 @@ namespace crow
         response& operator = (response&& r) noexcept
         {
             body = std::move(r.body);
+            bytes = std::move(r.bytes);
             json_value = std::move(r.json_value);
             code = r.code;
             headers = std::move(r.headers);
@@ -81,6 +86,7 @@ namespace crow
         {
             body.clear();
             json_value.clear();
+            bytes.clear();
             code = 200;
             headers.clear();
             completed_ = false;
@@ -90,6 +96,11 @@ namespace crow
         {
             code = 301;
             set_header("Location", location);
+        }
+
+        void write(const std::vector<char>& byte_part)
+        {
+            bytes.insert(std::end(bytes), std::begin(byte_part), std::end(byte_part));
         }
 
         void write(const std::string& body_part)
