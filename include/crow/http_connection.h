@@ -364,6 +364,7 @@ namespace crow
                 {201, "HTTP/1.1 201 Created\r\n"},
                 {202, "HTTP/1.1 202 Accepted\r\n"},
                 {204, "HTTP/1.1 204 No Content\r\n"},
+                {208, "HTTP/1.1 208 Already Reported\r\n"},
 
                 {300, "HTTP/1.1 300 Multiple Choices\r\n"},
                 {301, "HTTP/1.1 301 Moved Permanently\r\n"},
@@ -374,7 +375,10 @@ namespace crow
                 {401, "HTTP/1.1 401 Unauthorized\r\n"},
                 {403, "HTTP/1.1 403 Forbidden\r\n"},
                 {404, "HTTP/1.1 404 Not Found\r\n"},
+                {405, "HTTP/1.1 405 Method Not Allowed\r\n"},
+                {410, "HTTP/1.1 410 Gone\r\n"},
                 {413, "HTTP/1.1 413 Payload Too Large\r\n"},
+                {415, "HTTP/1.1 415 Unsupported Media Type\r\n"},
                 {422, "HTTP/1.1 422 Unprocessable Entity\r\n"},
                 {429, "HTTP/1.1 429 Too Many Requests\r\n"},
 
