@@ -244,14 +244,13 @@ inline boost::optional<std::pair<std::string, std::string>> qs_dict_name2kv(cons
 
 inline char * qs_scanvalue(const char * key, const char * qs, char * val, size_t val_len)
 {
-    size_t i, key_len;
     const char * tmp;
 
     // find the beginning of the k/v substrings
     if ( (tmp = strchr(qs, '?')) != NULL )
         qs = tmp + 1;
 
-    key_len = strlen(key);
+    const auto key_len = strlen(key);
     while(qs[0] != '#' && qs[0] != '\0')
     {
         if ( qs_strncmp(key, qs, key_len) == 0 )
@@ -265,7 +264,7 @@ inline char * qs_scanvalue(const char * key, const char * qs, char * val, size_t
     if ( qs[0] == '=' )
     {
         qs++;
-        i = strcspn(qs, "&=#");
+        const auto i = strcspn(qs, "&=#");
 #ifdef _MSC_VER
         strncpy_s(val, val_len, qs, (val_len - 1)<(i + 1) ? (val_len - 1) : (i + 1));
 #else
