@@ -365,7 +365,7 @@ namespace crow
 
                 bool is_FIN()
                 {
-                    return mini_header_ & 0x8000;
+                    return (mini_header_ & 0x8000) > 0;
                 }
 
                 int opcode()
