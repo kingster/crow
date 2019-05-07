@@ -33,7 +33,7 @@ namespace crow
             key add(std::function<void()> f)
             {
                 dq_.emplace_back(std::chrono::steady_clock::now(), std::move(f));
-                int ret = step_+dq_.size()-1;
+                int ret = static_cast<int>(step_+dq_.size()-1);
 
                 CROW_LOG_DEBUG << "timer add inside: " << this << ' ' << ret ;
                 return {this, ret};

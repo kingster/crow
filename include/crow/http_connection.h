@@ -469,7 +469,7 @@ namespace crow
                     bool error_while_reading = true;
                     if (!ec)
                     {
-                        bool ret = parser_.feed(buffer_.data(), bytes_transferred);
+                        bool ret = parser_.feed(buffer_.data(), static_cast<int>(bytes_transferred));
                         if (ret && adaptor_.is_open())
                         {
                             error_while_reading = false;

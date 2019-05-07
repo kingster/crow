@@ -106,7 +106,7 @@ namespace crow
                 on_message_complete,
             };
 
-            int nparsed = http_parser_execute(this, &settings_, buffer, length);
+            int nparsed = static_cast<int>(http_parser_execute(this, &settings_, buffer, length));
             return nparsed == length;
         }
 

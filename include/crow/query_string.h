@@ -114,7 +114,7 @@ inline int qs_parse(char * qs, char * qs_kv[], int qs_kv_size)
     while(i<qs_kv_size)
     {
         qs_kv[i] = substr_ptr;
-        j = strcspn(substr_ptr, "&");
+        j = static_cast<int>(strcspn(substr_ptr, "&"));
         if ( substr_ptr[j] == '\0' ) {  break;  }
         substr_ptr += j + 1;
         i++;
@@ -363,20 +363,20 @@ namespace crow
 
         char* get (const std::string& name) const
         {
-            char* ret = qs_k2v(name.c_str(), key_value_pairs_.data(), key_value_pairs_.size());
+            char* ret = qs_k2v(name.c_str(), key_value_pairs_.data(), static_cast<int>(key_value_pairs_.size()));
             return ret;
         }
 
         std::vector<char*> get_list (const std::string& name) const
         {
             std::vector<char*> ret;
-            std::string plus = name + "[]";            
+            std::string plus = name + "[]";
             char* element = nullptr;
 
             int count = 0;
-            while(1)
-            {
-                element = qs_k2v(plus.c_str(), key_value_pairs_.data(), key_value_pairs_.size(), count++);
+            while(1) {
+                element = qs_k2v(plus.c_str(), key_value_pairs_.data(),
+                                 static_cast<int>(key_value_pairs_.size()), count++);
                 if (!element)
                     break;
                 ret.push_back(element);
@@ -391,7 +391,7 @@ namespace crow
             int count = 0;
             while(1)
             {
-                if (auto element = qs_dict_name2kv(name.c_str(), key_value_pairs_.data(), key_value_pairs_.size(), count++))
+                if (auto element = qs_dict_name2kv(name.c_str(), key_value_pairs_.data(), static_cast<int>(key_value_pairs_.size()), count++))
                     ret.insert(*element);
                 else
                     break;

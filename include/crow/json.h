@@ -1126,7 +1126,7 @@ namespace crow
             s[size] = 0;
             auto ret = load_nocopy_internal(s, size);
             if (ret)
-                ret.key_.force(s, size);
+                ret.key_.force(s, static_cast<uint32_t>(size));
             else
                 delete[] s;
             return ret;
@@ -1392,7 +1392,7 @@ namespace crow
                     return 0;
                 if (!o)
                     return 0;
-                return o->count(str);
+                return static_cast<int>(o->count(str));
             }
 
             wvalue& operator[](const std::string& str)
