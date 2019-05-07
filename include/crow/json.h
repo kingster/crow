@@ -215,7 +215,7 @@ namespace crow
             static const int cached_bit = 2;
             static const int error_bit = 4;
         public:
-            rvalue() noexcept : option_{error_bit} 
+            rvalue() noexcept : option_{error_bit}
             {}
             rvalue(type t) noexcept
                 : lsize_{}, lremain_{}, t_{t}
@@ -637,13 +637,13 @@ namespace crow
                   nt_ = num_type::Unsigned_integer;
             }
 
-            mutable char* start_;
-            mutable char* end_;
+            mutable char* start_ = nullptr;
+            mutable char* end_ = nullptr;
             detail::r_string key_;
             std::unique_ptr<rvalue[]> l_;
-            uint32_t lsize_;
-            uint16_t lremain_;
-            type t_;
+            uint32_t lsize_ = 0;
+            uint16_t lremain_ = 0;
+            type t_ = type::Null;
             num_type nt_{num_type::Null};
             mutable uint8_t option_{0};
 
