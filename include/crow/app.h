@@ -80,7 +80,7 @@ namespace crow
             return *this;
         }
 
-        self_t& bindaddr(std::string bindaddr)
+        self_t& bindaddr(const std::string &bindaddr)
         {
             bindaddr_ = bindaddr;
             return *this;

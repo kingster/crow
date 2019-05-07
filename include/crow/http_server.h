@@ -26,7 +26,9 @@ namespace crow
     class Server
     {
     public:
-    Server(Handler* handler, std::string bindaddr, uint16_t port, std::tuple<Middlewares...>* middlewares = nullptr, uint16_t concurrency = 1, typename Adaptor::context* adaptor_ctx = nullptr)
+    Server(Handler* handler, const std::string &bindaddr, uint16_t port,
+           std::tuple<Middlewares...>* middlewares = nullptr, uint16_t concurrency = 1,
+           typename Adaptor::context* adaptor_ctx = nullptr)
             : acceptor_(io_service_, tcp::endpoint(boost::asio::ip::address::from_string(bindaddr), port)),
             signals_(io_service_, SIGINT, SIGTERM),
             tick_timer_(io_service_),
