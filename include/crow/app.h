@@ -59,9 +59,17 @@ namespace crow
             return router_.new_rule_dynamic(std::move(rule));
         }
 
+        /*
+          The following fix (using C++14 auto return type feature) circumvents a GCC 8.1+8.2
+          compiler error similar to:
+
+            crow/app.h: In instantiation of ‘typename std::result_of<decltype (& crow::Router::new_rule_tagged<Tag>)(crow::Router, std::__cxx11::basic_string<char>&&)>::type crow::Crow<Middlewares>::route(std::__cxx11::string&&) [with long unsigned int Tag = 2; Middlewares = {}]’:
+            crow/app.h:63:14: internal compiler error: in write_expression, at cp/mangle.c:3050
+
+          Note that Router::new_rule_tagged() returns a reference which is why we use "auto&".
+        */
         template <uint64_t Tag>
-        auto route(std::string&& rule)
-            -> typename std::result_of<decltype(&Router::new_rule_tagged<Tag>)(Router, std::string&&)>::type
+        auto &route(std::string &&rule)
         {
             return router_.new_rule_tagged<Tag>(std::move(rule));
         }
