@@ -41,38 +41,35 @@ else()
   find_package( Boost 1.52 COMPONENTS system thread REQUIRED )
 endif()
 
-include_directories( ${Boost_INCLUDE_DIR} )
 set(INC_DIR "${CMAKE_SOURCE_DIR}/include")
+set(BIN_DIR "${CMAKE_BINARY_DIR}")
 
-set(PROJECT_INCLUDE_DIR
-  ${PROJECT_SOURCE_DIR}/include
-  )
+include_directories("${INC_DIR}")
+include_directories("${CMAKE_SOURCE_DIR}")
+include_directories("${Boost_INCLUDE_DIR}")
 
-include_directories("${PROJECT_INCLUDE_DIR}")
-include_directories("${PROJECT_SOURCE_DIR}")
-
-#add_subdirectory(src)
 add_subdirectory(examples)
 
-if (MSVC)
-else()
+if (NOT MSVC)
   add_subdirectory(tests)
 
   enable_testing()
-  add_test(NAME crow_test COMMAND ${CMAKE_CURRENT_BINARY_DIR}/tests/unittest)
-  add_test(NAME template_test COMMAND ${CMAKE_CURRENT_BINARY_DIR}/tests/template/test.py WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tests/template)
+  add_test(NAME crow_test COMMAND ${BIN_DIR}/tests/unittest)
+  add_test(NAME template_test COMMAND ${BIN_DIR}/tests/template/test.py WORKING_DIRECTORY ${BIN_DIR}/tests/template)
 
-  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/amalgamate)
+  file(MAKE_DIRECTORY ${BIN_DIR}/amalgamate)
+
   file(GLOB inc_files
     "${INC_DIR}/*.h"
     "${INC_DIR}/crow/*.h")
 
-  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/amalgamate/crow_all.h
-    COMMAND python ${PROJECT_SOURCE_DIR}/amalgamate/merge_all.py ${PROJECT_SOURCE_DIR}/include
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/amalgamate/crow_all.h ${PROJECT_SOURCE_DIR}/amalgamate
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/amalgamate
+  add_custom_command(
+    OUTPUT ${BIN_DIR}/amalgamate/crow_all.h
+    COMMAND python ${CMAKE_SOURCE_DIR}/amalgamate/merge_all.py ${INC_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy ${BIN_DIR}/amalgamate/crow_all.h ${CMAKE_SOURCE_DIR}/amalgamate
+    WORKING_DIRECTORY ${BIN_DIR}/amalgamate
     DEPENDS ${inc_files}
     )
 
-  add_custom_target(amalgamation ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/amalgamate/crow_all.h)
+  add_custom_target(amalgamation ALL DEPENDS ${BIN_DIR}/amalgamate/crow_all.h)
 endif()
