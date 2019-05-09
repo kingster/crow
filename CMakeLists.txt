@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.12)
 project(crow_all)
 
 # Exports the "compile_commands.json" file when the generator is Ninja or Makefile.
@@ -63,9 +63,10 @@ if (NOT MSVC)
     "${INC_DIR}/*.h"
     "${INC_DIR}/crow/*.h")
 
+  find_package(Python3 COMPONENTS Interpreter REQUIRED)
   add_custom_command(
     OUTPUT ${BIN_DIR}/amalgamate/crow_all.h
-    COMMAND python ${CMAKE_SOURCE_DIR}/amalgamate/merge_all.py ${INC_DIR}
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/amalgamate/merge_all.py ${INC_DIR}
     COMMAND ${CMAKE_COMMAND} -E copy ${BIN_DIR}/amalgamate/crow_all.h ${CMAKE_SOURCE_DIR}/amalgamate
     WORKING_DIRECTORY ${BIN_DIR}/amalgamate
     DEPENDS ${inc_files}
