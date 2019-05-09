@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 project(crow_all)
 
 # Exports the "compile_commands.json" file when the generator is Ninja or Makefile.
-SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(USE_CCACHE "Use ccache (if found) to speed up compile and link" ON)
 option(ADDRESS_SANITIZER "Use memory error detector (clang only and implies debug mode!)" OFF)
@@ -14,6 +14,7 @@ endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
+include(compilation)
 include(deps)
 
 if (USE_CCACHE)
@@ -41,10 +42,6 @@ endif()
 if (NOT CMAKE_BUILD_TYPE)
   message(STATUS "No build type selected, default to Release")
   set(CMAKE_BUILD_TYPE "Release")
-endif()
-
-if (NOT MSVC)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++1y -pedantic -Wextra")
 endif()
 
 set(INC_DIR "${CMAKE_SOURCE_DIR}/include")
