@@ -5,6 +5,7 @@ project(crow_all)
 SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(USE_CCACHE "Use ccache (if found) to speed up compile and link" ON)
+option(ADDRESS_SANITIZER "Use memory error detector (clang only and implies debug mode!)" OFF)
 
 if (EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
   include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
@@ -30,6 +31,17 @@ if (USE_CCACHE)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
   endif(CCACHE_FOUND)
+endif()
+
+if (ADDRESS_SANITIZER)
+  if (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    message(FATAL_ERROR "Clang is required to use address sanitizer to detect memory errors!")
+  endif()
+
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O1 -g -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls")
+
+  message(STATUS "Build type forced to Debug due to address sanitizer option")
+  set(CMAKE_BUILD_TYPE Debug)
 endif()
 
 if (NOT CMAKE_BUILD_TYPE)
