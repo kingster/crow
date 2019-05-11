@@ -40,6 +40,7 @@ add_executable(
 
   query_string.cc
   common.cc
+  ci_map.cc
   )
 
 add_test(
