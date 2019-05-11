@@ -53,9 +53,9 @@ include_directories("${CMAKE_SOURCE_DIR}")
 add_subdirectory(examples)
 
 if (NOT MSVC)
+  enable_testing()
   add_subdirectory(tests)
 
-  enable_testing()
   add_test(NAME crow_test COMMAND ${BIN_DIR}/tests/unittest)
   add_test(NAME template_test COMMAND ${BIN_DIR}/tests/template/test.py WORKING_DIRECTORY ${BIN_DIR}/tests/template)
 
