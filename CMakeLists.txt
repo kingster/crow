@@ -49,7 +49,6 @@ set(BIN_DIR "${CMAKE_BINARY_DIR}")
 
 include_directories("${INC_DIR}")
 include_directories("${CMAKE_SOURCE_DIR}")
-include_directories("${Boost_INCLUDE_DIR}")
 
 add_subdirectory(examples)
 
