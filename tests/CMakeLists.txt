@@ -37,6 +37,8 @@ add_executable(
 
   gtest/src/gtest_main.cc
   gtest/src/gtest-all.cc
+
+  query_string.cc
   )
 
 add_test(
