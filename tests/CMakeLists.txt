@@ -42,6 +42,7 @@ add_executable(
   common.cc
   ci_map.cc
   logging.cc
+  utility.cc
   )
 
 add_test(
