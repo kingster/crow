@@ -43,6 +43,7 @@ add_executable(
   ci_map.cc
   logging.cc
   utility.cc
+  json.cc
   )
 
 add_test(
