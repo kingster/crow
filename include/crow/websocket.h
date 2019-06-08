@@ -88,7 +88,7 @@ namespace crow
                 {
                     dispatch([this, msg]{
                         char buf[3] = "\x8A\x00";
-                        buf[1] += msg.size();
+                        buf[1] += static_cast<char>(msg.size());
                         write_buffers_.emplace_back(buf, buf+2);
                         write_buffers_.emplace_back(msg);
                         do_write();
@@ -140,7 +140,7 @@ namespace crow
                     buf[0] += opcode;
                     if (size < 126)
                     {
-                        buf[1] += size;
+                        buf[1] += static_cast<char>(size);
                         return {buf, buf+2};
                     }
                     else if (size < 0x10000)
@@ -365,7 +365,7 @@ namespace crow
 
                 bool is_FIN()
                 {
-                    return mini_header_ & 0x8000;
+                    return (mini_header_ & 0x8000) > 0;
                 }
 
                 int opcode()
@@ -391,6 +391,7 @@ namespace crow
                                     message_.clear();
                                 }
                             }
+                            break;
                         case 1: // Text
                             {
                                 is_binary_ = false;

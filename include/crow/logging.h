@@ -13,14 +13,6 @@ namespace crow
 {
     enum class LogLevel
     {
-#ifndef ERROR
-        DEBUG = 0,
-        INFO,
-        WARNING,
-        ERROR,
-        CRITICAL,
-#endif
-
         Debug = 0,
         Info,
         Warning,
@@ -30,12 +22,12 @@ namespace crow
 
     class ILogHandler {
         public:
-            virtual void log(std::string message, LogLevel level) = 0;
+            virtual void log(const std::string &message, LogLevel level) = 0;
     };
 
     class CerrLogHandler : public ILogHandler {
         public:
-            void log(std::string message, LogLevel /*level*/) override {
+            void log(const std::string &message, LogLevel /*level*/) override {
                 std::cerr << message;
             }
     };
@@ -51,7 +43,7 @@ namespace crow
 
                 tm my_tm;
 
-#if defined(_MSC_VER) or defined(__MINGW32__)
+#if defined(_MSC_VER) || defined(__MINGW32__)
                 localtime_s(&my_tm, &t);
 #else
                 localtime_r(&t, &my_tm);
@@ -64,7 +56,7 @@ namespace crow
         public:
 
 
-            logger(std::string prefix, LogLevel level) : level_(level) {
+            logger(const std::string &prefix, LogLevel level) : level_(level) {
     #ifdef CROW_ENABLE_LOGGING
                     stringstream_ << "(" << timestamp() << ") [" << prefix << "] ";
     #endif
@@ -73,8 +65,11 @@ namespace crow
             ~logger() {
     #ifdef CROW_ENABLE_LOGGING
                 if(level_ >= get_current_log_level()) {
-                    stringstream_ << std::endl;
-                    get_handler_ref()->log(stringstream_.str(), level_);
+                    auto handler = get_handler_ref();
+                    if (handler) {
+                        stringstream_ << std::endl;
+                        handler->log(stringstream_.str(), level_);
+                    }
                 }
     #endif
             }

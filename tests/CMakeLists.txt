@@ -25,3 +25,28 @@ add_subdirectory(template)
 #-Wno-deprecated -Woverloaded-virtual -Wwrite-strings -fprofile-arcs -ftest-coverage"
 #CFLAGS="-g -O0 -Wall -W -fprofile-arcs -ftest-coverage"
 #LDFLAGS="-fprofile-arcs -ftest-coverage"
+
+include_directories(
+  SYSTEM
+  gtest/
+  gtest/include
+  )
+
+add_executable(
+  tests
+
+  gtest/src/gtest_main.cc
+  gtest/src/gtest-all.cc
+
+  query_string.cc
+  common.cc
+  ci_map.cc
+  logging.cc
+  utility.cc
+  json.cc
+  )
+
+add_test(
+  NAME tests
+  COMMAND tests
+  )

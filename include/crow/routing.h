@@ -677,7 +677,7 @@ public:
                     if (errno != ERANGE && eptr != req_url.data()+pos)
                     {
                         params->int_params.push_back(value);
-                        auto ret = find(req_url, &nodes_[node->param_childrens[(int)ParamType::INT]], eptr - req_url.data(), params);
+                        auto ret = find(req_url, &nodes_[node->param_childrens[(int)ParamType::INT]], static_cast<unsigned int>(eptr - req_url.data()), params);
                         update_found(ret);
                         params->int_params.pop_back();
                     }
@@ -695,7 +695,7 @@ public:
                     if (errno != ERANGE && eptr != req_url.data()+pos)
                     {
                         params->uint_params.push_back(value);
-                        auto ret = find(req_url, &nodes_[node->param_childrens[(int)ParamType::UINT]], eptr - req_url.data(), params);
+                        auto ret = find(req_url, &nodes_[node->param_childrens[(int)ParamType::UINT]], static_cast<unsigned int>(eptr - req_url.data()), params);
                         update_found(ret);
                         params->uint_params.pop_back();
                     }
@@ -713,7 +713,7 @@ public:
                     if (errno != ERANGE && eptr != req_url.data()+pos)
                     {
                         params->double_params.push_back(value);
-                        auto ret = find(req_url, &nodes_[node->param_childrens[(int)ParamType::DOUBLE]], eptr - req_url.data(), params);
+                        auto ret = find(req_url, &nodes_[node->param_childrens[(int)ParamType::DOUBLE]], static_cast<unsigned int>(eptr - req_url.data()), params);
                         update_found(ret);
                         params->double_params.pop_back();
                     }
@@ -732,7 +732,7 @@ public:
                 if (epos != pos)
                 {
                     params->string_params.push_back(req_url.substr(pos, epos-pos));
-                    auto ret = find(req_url, &nodes_[node->param_childrens[(int)ParamType::STRING]], epos, params);
+                    auto ret = find(req_url, &nodes_[node->param_childrens[(int)ParamType::STRING]], static_cast<unsigned int>(epos), params);
                     update_found(ret);
                     params->string_params.pop_back();
                 }
@@ -745,7 +745,7 @@ public:
                 if (epos != pos)
                 {
                     params->string_params.push_back(req_url.substr(pos, epos-pos));
-                    auto ret = find(req_url, &nodes_[node->param_childrens[(int)ParamType::PATH]], epos, params);
+                    auto ret = find(req_url, &nodes_[node->param_childrens[(int)ParamType::PATH]], static_cast<unsigned int>(epos), params);
                     update_found(ret);
                     params->string_params.pop_back();
                 }
@@ -758,7 +758,7 @@ public:
 
                 if (req_url.compare(pos, fragment.size(), fragment) == 0)
                 {
-                    auto ret = find(req_url, child, pos + fragment.size(), params);
+                    auto ret = find(req_url, child, static_cast<unsigned int>(pos + fragment.size()), params);
                     update_found(ret);
                 }
             }
@@ -800,7 +800,7 @@ public:
                                 nodes_[idx].param_childrens[(int)x.type] = new_node_idx;
                             }
                             idx = nodes_[idx].param_childrens[(int)x.type];
-                            i += x.name.size();
+                            i += static_cast<unsigned int>(x.name.size());
                             break;
                         }
                     }
@@ -882,7 +882,7 @@ public:
         unsigned new_node()
         {
             nodes_.resize(nodes_.size()+1);
-            return nodes_.size() - 1;
+            return static_cast<unsigned int>(nodes_.size() - 1);
         }
 
         std::vector<Node> nodes_;
@@ -928,7 +928,7 @@ public:
             ruleObject->foreach_method([&](int method)
                     {
                         per_methods_[method].rules.emplace_back(ruleObject);
-                        per_methods_[method].trie.add(rule, per_methods_[method].rules.size() - 1);
+                        per_methods_[method].trie.add(rule, static_cast<unsigned int>(per_methods_[method].rules.size() - 1));
 
                         // directory case: 
                         //   request to `/about' url matches `/about/' rule 

@@ -4,7 +4,6 @@ from os import path as pt
 import re
 from collections import defaultdict
 import sys
-
 header_path = "../include"
 if len(sys.argv) > 1:
     header_path = sys.argv[1]
@@ -12,7 +11,8 @@ if len(sys.argv) > 1:
 OUTPUT = 'crow_all.h'
 re_depends = re.compile('^#include "(.*)"', re.MULTILINE)
 headers = [x.rsplit('/', 1)[-1] for x in glob(pt.join(header_path, '*.h*'))]
-headers += ['crow/' + x.rsplit('/', 1)[-1] for x in glob(pt.join(header_path, 'crow/*.h*'))]
+headers += ['crow/' + x.rsplit('/', 1)[-1]
+            for x in glob(pt.join(header_path, 'crow/*.h*'))]
 print(headers)
 edges = defaultdict(list)
 for header in headers:
@@ -33,6 +33,7 @@ def dfs(x):
         if not visited[y]:
             dfs(y)
     order.append(x)
+
 
 for header in headers:
     if not visited[header]:
