@@ -137,12 +137,16 @@ namespace crow
 #ifdef CROW_ENABLE_SSL
             if (use_ssl_)
             {
-                ssl_server_->stop();
+		if (ssl_server_) {
+                    ssl_server_->stop();
+		}
             }
             else
 #endif
             {
-                server_->stop();
+		if (server_) {
+                    server_->stop();
+		}
             }
         }
 
