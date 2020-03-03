@@ -378,6 +378,8 @@ namespace crow
                 {403, "HTTP/1.1 403 Forbidden\r\n"},
                 {404, "HTTP/1.1 404 Not Found\r\n"},
                 {405, "HTTP/1.1 405 Method Not Allowed\r\n"},
+                {408, "HTTP/1.1 408 Request Timeout\r\n"},
+
                 {410, "HTTP/1.1 410 Gone\r\n"},
                 {413, "HTTP/1.1 413 Payload Too Large\r\n"},
                 {415, "HTTP/1.1 415 Unsupported Media Type\r\n"},
