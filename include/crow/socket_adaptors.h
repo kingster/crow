@@ -4,6 +4,11 @@
 #include <boost/asio/ssl.hpp>
 #endif
 #include "crow/settings.h"
+#if BOOST_VERSION >= 107000
+#define GET_IO_SERVICE(s) ((boost::asio::io_context&)(s).get_executor().context())
+#else
+#define GET_IO_SERVICE(s) ((s).get_io_service())
+#endif
 namespace crow
 {
     using namespace boost;
@@ -19,7 +24,7 @@ namespace crow
 
         boost::asio::io_service& get_io_service()
         {
-            return socket_.get_io_service();
+            return GET_IO_SERVICE(socket_);
         }
 
         tcp::socket& raw_socket()
@@ -46,6 +51,24 @@ namespace crow
         {
             boost::system::error_code ec;
             socket_.close(ec);
+        }
+
+        void shutdown_readwrite()
+        {
+            boost::system::error_code ec;
+            socket_.shutdown(boost::asio::socket_base::shutdown_type::shutdown_both, ec);
+        }
+
+        void shutdown_write()
+        {
+            boost::system::error_code ec;
+            socket_.shutdown(boost::asio::socket_base::shutdown_type::shutdown_send, ec);
+        }
+
+        void shutdown_read()
+        {
+            boost::system::error_code ec;
+            socket_.shutdown(boost::asio::socket_base::shutdown_type::shutdown_receive, ec);
         }
 
         template <typename F> 
@@ -94,9 +117,27 @@ namespace crow
             raw_socket().close(ec);
         }
 
+        void shutdown_readwrite()
+        {
+            boost::system::error_code ec;
+            raw_socket().shutdown(boost::asio::socket_base::shutdown_type::shutdown_both, ec);
+        }
+
+        void shutdown_write()
+        {
+            boost::system::error_code ec;
+            raw_socket().shutdown(boost::asio::socket_base::shutdown_type::shutdown_send, ec);
+        }
+
+        void shutdown_read()
+        {
+            boost::system::error_code ec;
+            raw_socket().shutdown(boost::asio::socket_base::shutdown_type::shutdown_receive, ec);
+        }
+
         boost::asio::io_service& get_io_service()
         {
-            return raw_socket().get_io_service();
+            return GET_IO_SERVICE(raw_socket());
         }
 
         template <typename F> 

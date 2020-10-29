@@ -1,0 +1,1 @@
+g++ -std=c++1z example_with_all.cpp -lboost_system -lboost_filesystem -I /Volumes/Workspace/voice/tinyphone/lib/crow/include

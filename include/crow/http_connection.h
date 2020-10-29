@@ -181,6 +181,7 @@ namespace crow
     template <typename Adaptor, typename Handler, typename ... Middlewares>
     class Connection
     {
+        friend struct crow::response;
     public:
         Connection(
             boost::asio::io_service& io_service,
@@ -350,7 +351,21 @@ namespace crow
                     decltype(*middlewares_)>
                 (*middlewares_, ctx_, req_, res);
             }
+           prepare_buffers();
+            CROW_LOG_INFO << "Response: " << this << ' ' << req_.raw_url << ' ' << res.code << ' ' << close_connection_;
+            if (res.file_info.path.size())
+            {
+                do_write_static();
+            }else {
+                do_write_general();
+            }
 
+        }
+
+    private:
+
+        void prepare_buffers()
+        {
             //auto self = this->shared_from_this();
             res.complete_request_handler_ = nullptr;
 
@@ -379,7 +394,6 @@ namespace crow
                 {404, "HTTP/1.1 404 Not Found\r\n"},
                 {405, "HTTP/1.1 405 Method Not Allowed\r\n"},
                 {408, "HTTP/1.1 408 Request Timeout\r\n"},
-
                 {410, "HTTP/1.1 410 Gone\r\n"},
                 {413, "HTTP/1.1 413 Payload Too Large\r\n"},
                 {415, "HTTP/1.1 415 Unsupported Media Type\r\n"},
@@ -458,22 +472,56 @@ namespace crow
             }
 
             buffers_.emplace_back(crlf.data(), crlf.size());
-            //res_body_copy_.swap(res.body);
-            res_bytes_copy_.swap(res.bytes);
-            //buffers_.emplace_back(res_body_copy_.data(), res_body_copy_.size());
-            buffers_.emplace_back(res_bytes_copy_.data(), res_bytes_copy_.size());
+            
+        }
+#if !defined(_WIN32)
+        void do_write_static()
+        {
+            is_writing = true;
+            boost::asio::write(adaptor_.socket(), buffers_);
+            res.do_stream_file(adaptor_);
 
-            do_write();
-
-            if (need_to_start_read_after_complete_)
+            res.end();
+            res.clear();
+            buffers_.clear();
+        }
+#else //TODO support windows
+        void do_write_static(){
+            CROW_LOG_INFO << "windows static file support is not ready";
+            res.code = 500;
+            res.end();
+            res.clear();
+            buffers_.clear();
+        }
+#endif
+        void do_write_general()
+        {
+            if (res.body.length() < res_stream_threshold_)
             {
-                need_to_start_read_after_complete_ = false;
-                start_deadline();
-                do_read();
+                res_body_copy_.swap(res.body);
+                buffers_.emplace_back(res_body_copy_.data(), res_body_copy_.size());
+
+                do_write();
+
+                if (need_to_start_read_after_complete_)
+                {
+                    need_to_start_read_after_complete_ = false;
+                    start_deadline();
+                    do_read();
+                }
+            }
+            else
+            {
+                is_writing = true;
+                boost::asio::write(adaptor_.socket(), buffers_);
+                res.do_stream_body(adaptor_);
+
+                res.end();
+                res.clear();
+                buffers_.clear();
             }
         }
 
-    private:
         void do_read()
         {
             //auto self = this->shared_from_this();
@@ -495,6 +543,7 @@ namespace crow
                     {
                         cancel_deadline_timer();
                         parser_.done();
+                        adaptor_.shutdown_read();
                         adaptor_.close();
                         is_reading = false;
                         CROW_LOG_DEBUG << this << " from read(1)";
@@ -535,6 +584,7 @@ namespace crow
                     {
                         if (close_connection_)
                         {
+                            adaptor_.shutdown_write();
                             adaptor_.close();
                             CROW_LOG_DEBUG << this << " from write(1)";
                             check_destroy();
@@ -574,6 +624,7 @@ namespace crow
                 {
                     return;
                 }
+                adaptor_.shutdown_readwrite();
                 adaptor_.close();
             });
             CROW_LOG_DEBUG << this << " timer added: " << timer_cancel_key_.first << ' ' << timer_cancel_key_.second;
@@ -584,6 +635,8 @@ namespace crow
         Handler* handler_;
 
         boost::array<char, 4096> buffer_;
+
+        const uint res_stream_threshold_ = 1048576;
 
         HTTPParser<Connection> parser_;
         request req_;

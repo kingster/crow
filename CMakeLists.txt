@@ -39,13 +39,11 @@ if (ADDRESS_SANITIZER)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-if (NOT CMAKE_BUILD_TYPE)
-  message(STATUS "No build type selected, default to Release")
-  set(CMAKE_BUILD_TYPE "Release")
-endif()
+include_directories(${Boost_INCLUDE_DIR})
 
-set(INC_DIR "${CMAKE_SOURCE_DIR}/include")
-set(BIN_DIR "${CMAKE_BINARY_DIR}")
+set(PROJECT_INCLUDE_DIR
+  ${PROJECT_SOURCE_DIR}/include
+)
 
 include_directories("${INC_DIR}")
 include_directories("${CMAKE_SOURCE_DIR}")
@@ -65,14 +63,14 @@ if (NOT MSVC)
     "${INC_DIR}/*.h"
     "${INC_DIR}/crow/*.h")
 
-  find_package(Python3 COMPONENTS Interpreter REQUIRED)
-  add_custom_command(
-    OUTPUT ${BIN_DIR}/amalgamate/crow_all.h
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/amalgamate/merge_all.py ${INC_DIR}
-    COMMAND ${CMAKE_COMMAND} -E copy ${BIN_DIR}/amalgamate/crow_all.h ${CMAKE_SOURCE_DIR}/amalgamate
-    WORKING_DIRECTORY ${BIN_DIR}/amalgamate
-    DEPENDS ${inc_files}
-    )
+	add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/amalgamate/crow_all.h
+		COMMAND python ${PROJECT_SOURCE_DIR}/amalgamate/merge_all.py
+		${PROJECT_SOURCE_DIR}/include
+		${CMAKE_CURRENT_BINARY_DIR}/amalgamate/crow_all.h
+		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/amalgamate/crow_all.h ${PROJECT_SOURCE_DIR}/amalgamate
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/amalgamate
+		DEPENDS ${PROJECT_SOURCE_DIR}/include/*.h ${PROJECT_SOURCE_DIR}/include/crow/*.h
+  )
 
   add_custom_target(amalgamation ALL DEPENDS ${BIN_DIR}/amalgamate/crow_all.h)
 endif()
